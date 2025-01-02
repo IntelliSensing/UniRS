@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="description" content="UniRS: Unifying Multi-temporal Remote Sensing Tasks through Vision Language Models">
+    <meta name="keywords" content="multimodal chatbot">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>UniRS: Unifying Multi-temporal Remote Sensing Tasks through Vision Language Models</title>
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <link rel="stylesheet" href="./static/css/index.css">
+    <link rel="icon" href="images/UniRS_Icon.png">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/js/all.min.js"></script>
+    <script type="module" src="https://gradio.s3-us-west-2.amazonaws.com/3.27.0/gradio.js"></script>
+    <script>MathJax = {tex: {inlineMath: [['$', '$'],['$$', '$$'], ['\\(', '\\)']]}}</script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+</head>
+
+
+<style>
+    .section {
+        margin-bottom: -30px;
+        /* Adjust this value as needed to reduce the space */
+    }
+
+    .expandable-card .card-text-container {
+        max-height: 200px;
+        overflow-y: hidden;
+        position: relative;
+    }
+
+    .expandable-card.expanded .card-text-container {
+        max-height: none;
+    }
+
+    .expand-btn {
+        position: relative;
+        display: none;
+        background-color: rgba(255, 255, 255, 0.8);
+        /* margin-top: -20px; */
+        /* justify-content: center; */
+        color: #510c75;
+        border-color: transparent;
+    }
+
+    .expand-btn:hover {
+        background-color: rgba(200, 200, 200, 0.8);
+        text-decoration: none;
+        border-color: transparent;
+        color: #510c75;
+    }
+
+    .expand-btn:focus {
+        outline: none;
+        text-decoration: none;
+    }
+
+    .expandable-card:not(.expanded) .card-text-container:after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 90px;
+        background: linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 1));
+    }
+
+    .expandable-card:not(.expanded) .expand-btn {
+        margin-top: -40px;
+    }
+
+    .card-body {
+        padding-bottom: 5px;
+    }
+
+    .vertical-flex-layout {
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .figure-img {
+        max-width: 100%;
+        height: auto;
+    }
+
+    .adjustable-font-size {
+        font-size: calc(0.5rem + 2vw);
+    }
+
+    .chat-history {
+        flex-grow: 1;
+        overflow-y: auto;
+        /* overflow-x: hidden; */
+        padding: 5px;
+        border-bottom: 1px solid #ccc;
+        margin-bottom: 10px;
+    }
+
+    #gradio pre {
+        background-color: transparent;
+    }
+
+    .table-con {
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: center;
+        margin: 0 auto;
+        margin-top: 2rem;
+    }
+
+    table caption {
+        text-align: center;
+    }
+
+    table tr,
+    table td {
+        border: 1px solid;
+    }
+
+    table td {
+        padding: 0.5rem 3.5rem;
+        vertical-align: middle;
+    }
+
+    table tr:first-child {
+        background-color: #f2f2f2;
+    }
+
+    table tr:last-child {
+        background-color: rgb(240, 243, 255);
+    }
+
+    .qual .title {
+        margin-top: 2.5rem;
+    }
+
+    .title img {
+        width: 3.5rem;
+    }
+    .mobile-yt{
+        display: none;
+    }
+    .desktop-yt{
+        display: block;
+    }
+
+    @media only screen and (max-width: 600px) {
+        table td {
+            padding: 0.5rem 0.5rem;
+            /* Adjust padding for smaller screens */
+        }
+
+        img {
+            width: 100%;
+        }
+        .hero img{
+            width: 7rem;
+        }
+        .mobile-yt{
+        display: block;
+        }
+        .desktop-yt{
+            display: none;
+        }
+    }
+</style>
+
+<body>
+    <section class="hero">
+        <div class="hero-body">
+            <div class="container is-max-desktop">
+                <div class="columns is-centered">
+                    <div class="column has-text-centered">
+                        <img src="images/UniRS_Icon.png" alt="unirs_logo" width="100">
+                        <h1 class="title is-1 publication-title">UniRS: Unifying Multi-temporal Remote Sensing Tasks through Vision Language Models</h1>
+                        <div class="is-size-5 publication-authors">
+                            <!-- First Group of 3 Authors -->
+                            <div class="author-group">
+                                <span class="author-block">
+                                    <a href="https://scholar.google.com/citations?user=gAfFuhsAAAAJ&hl"
+                                        style="color:#f68946;font-weight:normal;">Yujie Li</a>,
+                                </span>
+                                <span class="author-block">
+                                    <a href="http://wenjia.ruantang.top/"
+                                        style="color:#008AD7;font-weight:normal;">Wenjia Xu<sup>*</sup></a>,
+                                </span>
+                            </div>
+
+                            <!-- Second Group of 3 Authors -->
+                            <div class="author-group">
+                                <span class="author-block">
+                                    <a href="https://people.ucas.ac.cn/~liguangzuo"
+                                        style="color:#F2A900;font-weight:normal;">Guangzuo Li</a>,
+                                </span>
+                                <span class="author-block">
+                                    <a href="https://sites.google.com/site/"
+                                        style="color:#F2A900;font-weight:normal;">Zijian Yu</a>,
+                                </span>
+                                <span class="author-block">
+                                    <a href="https://trentonwei.github.io/?continueFlag=24428397aaeb0cc6751570d48a532d36"
+                                        style="color:#f68946;font-weight:normal;">Zhiwei Wei</a>,
+                                </span>
+                                <span class="author-block">
+                                    <a href="https://jiuniu.ruantang.top/"
+                                        style="color:#f68946;font-weight:normal;">Jiuniu Wang</a>,
+                                </span>
+                                <span class="author-block">
+                                    <a href="https://scholar.google.com/citations?user=85mAZVcAAAAJ&hl"
+                                       style="color:#f68946;font-weight:normal;">Mugen Peng</a>,
+                                </span>
+                            </div>
+                        </div>
+                        <div class="is-size-5 publication-authors">
+                            State Key Laboratory of Networking and Switching Technology, Beijing University of Posts and Telecommunications<br>
+                            Aerospace Information Research Institute, Chinese Academy of Sciences<br>
+                            School of Geographic Sciences, Hunan Normal University<br>
+                            Department of Computer Science, City University of Hong Kong<br>
+                        </div>
+                        <div class="is-size-6 publication-authors">
+                            <span class="author-block"><sup>*</sup>The corresponding author</span>
+                        </div>
+                        <div class="column has-text-centered">
+                            <div class="publication-links">
+                                <span class="link-block">
+                                    <a href="https://arxiv.org/abs/2412.20742" target="_blank"
+                                        class="external-link button is-normal is-rounded is-dark">
+                                        <span class="icon">
+                                            <i class="ai ai-arxiv"></i>
+                                        </span>
+                                        <span>arXiv</span>
+                                    </a>
+                                </span>
+                                <span class="link-block">
+                                    <a href="https://github.com/IntelliSensing/UniRS" target="_blank"
+                                        class="external-link button is-normal is-rounded is-dark">
+                                        <span class="icon">
+                                            <i class="fab fa-github"></i>
+                                        </span>
+                                        <span>Code</span>
+                                    </a>
+                                </span>
+                                <span class="link-block">
+                                    <a href="#grand-dataset" target="_blank"
+                                        class="external-link button is-normal is-rounded is-dark">
+                                        <span class="icon">
+                                            <i class="fas fa-database"></i>
+                                        </span>
+                                        <span>Dataset</span>
+                                    </a>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="hero teaser">
+        <div class="container is-max-desktop">
+            <div class="hero-body">
+                <h4 class="subtitle has-text-justified">
+                    The domain gap between remote sensing imagery and natural images has recently received widespread
+                    attention and Vision-Language Models (VLMs) have demonstrated excellent generalization performance
+                    in remote sensing multimodal tasks. However, current research is still limited in exploring how remote
+                    sensing VLMs handle different types of visual inputs. To bridge this gap, we introduce
+                    <b>UniRS</b>, the first vision-language model <b>uni</b>fying multi-temporal <b>r</b>emote <b>s</b>ensing
+                    tasks across various types of visual input. UniRS supports single images, dual-time image pairs, and
+                    videos as input, enabling comprehensive remote sensing temporal analysis within a unified framework.
+                    We adopt a unified visual representation approach, enabling the model to accept various visual inputs.
+                    For dual-time image pair tasks, we customize a change extraction module to further enhance the
+                    extraction of spatiotemporal features. Additionally, we design a prompt augmentation mechanism
+                    tailored to the model's reasoning process, utilizing the prior knowledge of the general-purpose
+                    VLM to provide clues for UniRS. To promote multi-task knowledge sharing, the model is jointly
+                    fine-tuned on a mixed dataset. Experimental results show that UniRS achieves state-of-the-art
+                    performance across diverse tasks, including visual question answering, change captioning, and video
+                    scene classification, highlighting its versatility and effectiveness in unifying these multi-temporal
+                    remote sensing tasks.
+                </h4>
+            </div>
+        </div>
+    </section>
+
+<!--    <div class="desktop-yt" style="text-align:center;">-->
+<!--        <iframe width="1040" height="720" src="https://www.youtube.com/embed/KOKtkkKpNDk?si=0o0kqEAysSM98OYh"-->
+<!--            title="YouTube video player" frameborder="0"-->
+<!--            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"-->
+<!--            allowfullscreen></iframe>-->
+<!--    </div>-->
+
+<!--    <div class ="mobile-yt" style="text-align: center; max-width: 100%;">-->
+<!--        <div style="position: relative; overflow: hidden; padding-bottom: 56.25%;">-->
+<!--            &lt;!&ndash; 16:9 aspect ratio. You can adjust the padding-bottom percentage accordingly. &ndash;&gt;-->
+<!--            <iframe-->
+<!--                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"-->
+<!--                src="https://www.youtube.com/embed/KOKtkkKpNDk?si=0o0kqEAysSM98OYh"-->
+<!--                title="YouTube video player" frameborder="0"-->
+<!--                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"-->
+<!--                allowfullscreen-->
+<!--            ></iframe>-->
+<!--        </div>-->
+<!--    </div>-->
+    
+
+
+    <section class="section" style="background-color:#efeff081">
+        <div class="container is-max-desktop">
+            <!-- Abstract. -->
+            <div class="columns is-centered has-text-centered">
+                <div class="column is-six-fifths">
+                    <h2 class="title is-3">🏆 Contributions</h2>
+                    <div class="content has-text-justified">
+                        <ol type="1">
+                            <li>We propose UniRS, the first vision-language model designed to tackle multi-temporal remote
+                                sensing tasks, including visual question answering, change captioning, and video scene
+                                classification. It establishes a unified framework that combines three critical temporal
+                                visual input types in remote sensing i.e., single image, dual-time image pair, and video,
+                                broadening the capabilities of VLMs in remote sensing analysis, providing a paradigm for
+                                future research in multi-task integration within the remote sensing community. </li>
+                            <br>
+                            <li>We design a dedicated Change Extraction module, which enhances the comprehension of
+                                spatiotemporal semantic information in dual-time image pairs. This module incorporates a
+                                spatial feature enhancement component and a dual-time image feature fusion mechanism,
+                                enabling the model to detect and interpret local differences of interest and temporal
+                                relationships between two images. The module achieves high granularity in extracting and
+                                enhancing the spatiotemporal correlations of images, which is crucial for tasks requiring
+                                nuanced change detection. </li>
+                            <br>
+                            <li>We design a prompt augmentation mechanism for the inference process, which leverages the
+                                visual-language interaction capabilities of general VLM to enrich templated task instructions
+                                and provide task-specific clues for the UniRS in multimodal comprehension. During the
+                                clue generation, we design specific prompts for each type of remote sensing visual input.
+                                This mechanism utilizes the extensive prior knowledge of general-purpose VLM, facilitating
+                                the transfer of general knowledge to remote sensing analysis.</li>
+                            <br>
+                            <li>We develop a multi-task joint fine-tuning framework, designing task-specific prompt
+                                templates for different types of visual inputs to distinguish between tasks. UniRS is
+                                jointly trained on mixed datasets and the training promotes knowledge sharing across
+                                different tasks, enhancing the model's ability to understand the spatiotemporal features
+                                of remote sensing images compared to individual training. We extensively evaluate UniRS
+                                on visual question answering, change captioning, and video scene classification tasks,
+                                and it achieves state-of-the-art in all tasks, showcasing its versatility and effectiveness
+                                in tackling multi-temporal remote sensing challenges. </li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+    <!--Model Arch-->
+    <section class="section">
+        <div class="columns is-centered has-text-centered">
+            <div class="column is-six-fifths">
+                <h2 class="title is-3"><img src="images/UniRS_Icon.png" alt="unirs" width="60"
+                        style="vertical-align: bottom;"> UniRS: A unified framework integrating multi-temporal analysis</h2>
+            </div>
+        </div>
+
+        <div class="container is-max-desktop">
+
+            <div class="columns is-centered has-text-centered">
+                <div class="column is-six-fifths"
+                    style="display: flex; align-items: flex-start; justify-content: center;">
+                    <figure style="text-align: center;">
+                        <img id="teaser" width="70%" src="images/Teaser.jpg">s
+                        <!-- <figcaption>
+                            GeoChat can accomplish multiple tasks for remote-sensing (RS) image comprehension in a unified framework. Given suitable task tokens and user queries, the model can generate visually grounded responses (text with corresponding object locations - shown on top), visual question answering on images and regions (top left and bottom right, respectively) as well as scene classification (top right) and normal natural language conversations (bottom). This makes it the first RS VLM with grounding capability. 
+                        </figcaption> -->
+                    </figure>
+                </div>
+            </div>
+            <div class="columns is-centered">
+                <div class="column is-full-width">
+                    <div class="content has-text-justified">
+                        <p>
+                            Our UniRS is a framework unifying multi-temporal remote sensing tasks of various visual inputs
+                            within a single model. It can analyze three critical types of remote sensing visual inputs
+                            i.e., single image, dual-time image pair, and video, under task instructions. Our research
+                            focuses on typical remote sensing tasks for each input type, including visual question answering,
+                            change captioning, and video classification.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Model Arch -->
+    <section class="section">
+        <div class="columns is-centered has-text-centered">
+            <div class="column is-six-fifths">
+                <h2 class="title is-3"><img src="images/UniRS_Icon.png" alt="unirs" width="60"
+                        style="vertical-align: bottom;"> UniRS: Architecture</h2>
+            </div>
+        </div>
+
+        <div class="container is-max-desktop">
+
+            <div class="columns is-centered has-text-centered">
+                <div class="column is-six-fifths"
+                    style="display: flex; align-items: flex-start; justify-content: center;">
+                    <figure style="text-align: center;">
+                        <img id="teaser" width="100%" src="images/method.png">
+                    </figure>
+                </div>
+            </div>
+            <div class="columns is-centered">
+                <div class="column is-full-width">
+                    <div class="content has-text-justified">
+                        <p>
+                            The architecture of our UniRS. The left part of this figure includes the prompt augmentation
+                            mechanism and UniRS main architecture. UniRS is primarily composed of four components, i.e.,
+                            visual encoder $\mathcal{E}_v$, multimodal projector $\mathcal{M}_{m}$, language module $\mathcal{M}_{l}$,
+                            and change extraction module $\mathcal{M}_{c}$. Here change extraction module $\mathcal{M}_{c}$
+                            is designed for the dual-time image pair input to extract and enhance spatiotemporal relationship
+                            features between image pairs. During inference, all visual inputs $I$ are encoded into visual
+                            features $F$ by the visual encoder $\mathcal{E}_v$. In the prompt augmentation mechanism, initial
+                            visual clues $P_c$ are obtained after parsing and merged with the task instruction $P_t$ to
+                            form the full prompt $P$. In UniRS, the multimodal projector $\mathcal{M}_{m}$ projects visual
+                            feature $F$ into the text feature space as visual embedding $E_{I}$, which is then combined
+                            with the text embedding $E_{P}$ and fed into the language module $\mathcal{M}_{l}$ to get the
+                            final answer $a$. The right part of this figure is the structure of the change extraction module $\mathcal{M}_{c}$.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Model Arch -->
+    <!--Dataset-->
+    <section id="grand-dataset" class="section">
+        <div class="columns is-centered has-text-centered">
+            <div class="column is-six-fifths">
+                <h2 class="title is-3"><img src="images/UniRS_Icon.png" alt="unirs_logo" width="70"
+                        style="vertical-align: bottom;"> Inference Process of UniRS with Prompt Augmentation Mechanism</h2>
+            </div>
+        </div>
+        <!--Dataset Pipeline-->
+        <div class="container is-max-desktop">
+            <div class="columns is-centered">
+                <div class="column is-full-width">
+                    <div class="content has-text-justified">
+                        <p>
+                            The inference process of UniRS using prompt augmentation mechanism. During the execution of
+                            remote sensing tasks, visual inputs are first processed by the base model, where clues $P_{c}$
+                            are generated under the fixed prompts $P_g$ customized for each input type. These clues, special markers,
+                            task tags, and the task instruction $P_{t}$, are then merged to form the prompt $P$ input into UniRS.
+                            The model then generates the corresponding response $a$.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="columns is-centered has-text-centered">
+                <div class="column is-six-fifths"
+                    style="display: flex; align-items: flex-start; justify-content: center;">
+                    <figure style="text-align: center;">
+                        <img id="teaser" width="80%" src="images/TGRS_Inference_Process.jpg">
+                    </figure>
+                </div>
+            </div>
+        </div>
+        <br>
+    </section>
+    <!--Dataset-->
+    <!--Results-->
+    <section class="section">
+
+        <!-- qualitative results -->
+        <div class="columns is-centered has-text-centered">
+            <div class="column is-six-fifths">
+                <h2 class="title is-3"><img src="images/UniRS_Icon.png" alt="unirs_logo" width="70"
+                        style="vertical-align: bottom;"> Qualitative Results</h2>
+            </div>
+        </div>
+
+        <div class="container is-max-desktop">
+            <div class="columns is-centered has-text-centered">
+                <div class="column is-six-fifths"
+                    style="display: flex; align-items: flex-start; justify-content: center;">
+                    <figure style="text-align: center;">
+                        <img id="teaser" width="100%" src="images/qualitative.png">
+                    </figure>
+                </div>
+            </div>
+
+            <div class="columns is-centered">
+                <div class="column is-full-width">
+                    <div class="content has-text-justified">
+                        <p>
+                            Qualitative results of UniRS. (left-right) Results are shown on visual question answering,
+                            dual-time change captioning and video scene classification. The user can provide task-specific
+                            instructions to shape model responses according to the desired behavior. Compared with the
+                            previous mainstream remote sensing VLMs, general VLMs and traditional expert models, UniRS
+                            shows better generation performance in various tasks.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+
+        <!-- qualitative results -->
+        <div class="qual container">
+
+            <div class="container is-max-desktop">
+                <div class="columns is-centered">
+                    <div class="column is-full-width">
+                        <h2 class="title is-3">Remote Sensing Visual Question Answering (RSVQA)</h2>
+                        <div class="content has-text-justified">
+                            <p>
+                                We use the test sets from the RSVQA-LR, RSVQA-HR, and CRSVQA datasets for quantitative
+                                testing of the RSVQA task. For the testing of RSVQA-LR and RSVQA-HR, we follow the GeoChat
+                                benchmark settings. Additionally, we follow the setting of MQVQA, adopting 10% of the
+                                data as the test set and evaluating the performance under supervised assessment.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!--Table - GCG-->
+            <div class="table-con" style="text-align: center;">
+                <table>
+                    <tr>
+                        <td>Method</td>
+                        <td>Presence</td>
+                        <td>Comparison</td>
+                        <td>Rural/Urban</td>
+                        <td>Avg. Accuracy</td>
+                    </tr>
+                    <tr>
+                        <td>VILA-1.5 (3B)</td>
+                        <td>68.49</td>
+                        <td>64.99</td>
+                        <td>64.00</td>
+                        <td>66.44</td>
+                    </tr>
+                    <tr>
+                        <td>RSVQA</td>
+                        <td>87.47</td>
+                        <td>81.50</td>
+                        <td>90.00</td>
+                        <td>86.32</td>
+                    </tr>
+                    <tr>
+                        <td>Bi-Modal</td>
+                        <td>91.06</td>
+                        <td>91.16</td>
+                        <td>92.66</td>
+                        <td>91.63</td>
+                    </tr>
+                    <tr>
+                        <td>SHRNet</td>
+                        <td>91.03</td>
+                        <td>90.48</td>
+                        <td>94.00</td>
+                        <td>91.84</td>
+                    </tr>
+                    <tr>
+                        <td>RSGPT</td>
+                        <td>91.17</td>
+                        <td>91.70</td>
+                        <td>94.00</td>
+                        <td>92.29</td>
+                    </tr>
+                    <tr>
+                        <td>SkyEyeGPT (7B)</td>
+                        <td>88.93</td>
+                        <td>88.63</td>
+                        <td>75.00</td>
+                        <td>84.19</td>
+                    </tr>
+                    <tr>
+                        <td>LHRS-Bot (7B)</td>
+                        <td>89.07</td>
+                        <td>88.51</td>
+                        <td>90.00</td>
+                        <td>89.19</td>
+                    </tr>
+                    <tr>
+                        <td>GeoChat (7B)</td>
+                        <td>91.09</td>
+                        <td>90.33</td>
+                        <td>94.00</td>
+                        <td>90.70</td>
+                    </tr>
+                    <tr>
+                        <td>UniRS</td>
+                        <td>91.64</td>
+                        <td>92.68</td>
+                        <td>90.00</td>
+                        <td>92.21</td>
+                    </tr>
+                    <tr>
+                        <td>UniRS (further training)</td>
+                        <td>91.81</td>
+                        <td>93.23</td>
+                        <td>93.00</td>
+                        <td>92.63</td>
+                    </tr>
+                    <caption>Comparison of the visual question answering performance on RSVQA-LR Dataset. VILA-1.5 is
+                        evaluated under the zero-shot setting. Our UniRS, SkyEyeGPT, LHRS-Bot and Geochat are non-expert
+                        models. UniRS (further training) is compared with expert models.</caption>
+                </table>
+            </div>
+
+            <!--Table - GCG-->
+            <div class="table-con" style="text-align: center;">
+                <table>
+                    <tr>
+                        <td>Method</td>
+                        <td>Presence</td>
+                        <td>Comparison</td>
+                        <td>Avg. Accuracy</td>
+                    </tr>
+                    <tr>
+                        <td>VILA-1.5 (3B)</td>
+                        <td>61.44</td>
+                        <td>63.06</td>
+                        <td>62.79</td>
+                    </tr>
+                    <tr>
+                        <td>MiniGPTv2</td>
+                        <td>40.79</td>
+                        <td>50.91</td>
+                        <td>46.46</td>
+                    </tr>
+                    <tr>
+                        <td>LLaVA-1.5</td>
+                        <td>68.23</td>
+                        <td>65.45</td>
+                        <td>66.67</td>
+                    </tr>
+                    <tr>
+                        <td>GeoChat</td>
+                        <td>59.02</td>
+                        <td>83.16</td>
+                        <td>72.53</td>
+                    </tr>
+                    <tr>
+                        <td>EarthGPT</td>
+                        <td>62.77</td>
+                        <td>79.53</td>
+                        <td>72.06</td>
+                    </tr>
+                    <tr>
+                        <td>UniRS</td>
+                        <td>59.29</td>
+                        <td>84.05</td>
+                        <td>73.15</td>
+                    </tr>
+                    <caption>Comparison of the zero-shot visual question answering performance on RSVQA-HR dataset. We
+                        compare our UniRS with general VLMs and remote sensing VLMs under zero-shot settings.</caption>
+                </table>
+            </div>
+
+            <!--Table - GCG-->
+            <div class="table-con" style="text-align: center;">
+                <table>
+                    <tr>
+                        <td>Method</td>
+                        <td>OA</td>
+                    </tr>
+                    <tr>
+                        <td>VILA-1.5 (3B)</td>
+                        <td>80.33</td>
+                    </tr>
+                    <tr>
+                        <td>Qonly</td>
+                        <td>23.49</td>
+                    </tr>
+                    <tr>
+                        <td>RSVQA</td>
+                        <td>58.96</td>
+                    </tr>
+                    <tr>
+                        <td>RSVQA (GRU)</td>
+                        <td>59.41</td>
+                    </tr>
+                    <tr>
+                        <td>SAN</td>
+                        <td>61.17</td>
+                    </tr>
+                    <tr>
+                        <td>MQVQA</td>
+                        <td>70.91</td>
+                    </tr>
+                    <tr>
+                        <td>EarthGPT</td>
+                        <td>82.00</td>
+                    </tr>
+                    <tr>
+                        <td>GeoChat</td>
+                        <td>82.50</td>
+                    </tr>
+                    <tr>
+                        <td>UniRS</td>
+                        <td>86.67</td>
+                    </tr>
+                    <caption>Comparison of the visual question answering performance on CRSVQA dataset. VILA-1.5,
+                        EarthGPT, GeoChat, and UniRS are tested with supervised settings.</caption>
+                </table>
+            </div>
+        </div>
+
+
+        <!-- qualitative results -->
+        <div class="qual container">
+            <div class="container is-max-desktop">
+                <div class="columns is-centered">
+                    <div class="column is-full-width">
+                        <h2 class="title is-3">Remote Sensing Change Captioning</h2>
+
+                        <div class="content has-text-justified">
+                            <p>
+                                In the change captioning task, the user inputs a dual-time image pair and corresponding
+                                text instructions to the model. The model can understand the spatiotemporal features
+                                contained in the image pair and give a text description of the changes that occurred at
+                                the same location between two time nodes.
+
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--Table - GCG-->
+            <div class="table-con" style="text-align: center;">
+                <table>
+                    <tr>
+                        <td>Method</td>
+                        <td>CIDEr-D</td>
+                    </tr>
+                    <tr>
+                        <td>VILA-1.5 (3B)</td>
+                        <td>6.22</td>
+                    </tr>
+                    <tr>
+                        <td>RSICCFormer</td>
+                        <td>131.40</td>
+                    </tr>
+                    <tr>
+                        <td>PSNet</td>
+                        <td>132.62</td>
+                    </tr>
+                    <tr>
+                        <td>PromptCC</td>
+                        <td>136.44</td>
+                    </tr>
+                    <tr>
+                        <td>Chg2Cap</td>
+                        <td>136.61</td>
+                    </tr>
+                    <tr>
+                        <td>LLaVA-1.5</td>
+                        <td>126.25</td>
+                    </tr>
+                    <tr>
+                        <td>GeoChat</td>
+                        <td>128.36</td>
+                    </tr>
+                    <tr>
+                        <td>UniRS</td>
+                        <td>139.12</td>
+                    </tr>
+                    <caption>Comparison of the change captioning performance on LEVIR-CC Dataset. LLaVA-1.5 and GeoChat
+                        refer to the engineered models fine-tuned on LEVIR-CC train set.</caption>
+                </table>
+            </div>
+        </div>
+
+        <div class="qual container">
+
+            <div class="container is-max-desktop">
+                <div class="columns is-centered">
+                    <div class="column is-full-width">
+                        <h2 class="title is-3">Remote Sensing Video Scene Classification</h2>
+                        <div class="content has-text-justified">
+                            <p>
+                                UniRS also integrates the ability to understand and analyze remote sensing video content.
+                                By inputting drone bird’s-eye view video and text instructions, the model can give the
+                                corresponding video scene classification results.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--Table - GCG-->
+            <div class="table-con" style="text-align: center;">
+                <table>
+                    <tr>
+                        <td>Method</td>
+                        <td>post-earthquake</td>
+                        <td>flood</td>
+                        <td>fire</td>
+                        <td>landslide</td>
+                        <td>mudslide</td>
+                        <td>traffic collision</td>
+                        <td>traffic congestion</td>
+                        <td>harvesting</td>
+                        <td>ploughing</td>
+                        <td>constructing</td>
+                        <td>police chase</td>
+                        <td>conflict</td>
+                        <td>baseball</td>
+                        <td>basketball</td>
+                        <td>boating</td>
+                        <td>cycling</td>
+                        <td>running</td>
+                        <td>soccer</td>
+                        <td>swimming</td>
+                        <td>car racing</td>
+                        <td>party</td>
+                        <td>concert</td>
+                        <td>parade/protest</td>
+                        <td>religious activity</td>
+                        <td>non-event</td>
+                        <td>OA</td>
+                    </tr>
+                    <tr>
+                        <td>VILA-1.5 (3B)</td>
+                        <td>0.0</td>
+                        <td>63.3</td>
+                        <td>14.3</td>
+                        <td>16.3</td>
+                        <td>0.0</td>
+                        <td>35.8</td>
+                        <td>70.0</td>
+                        <td>28.1</td>
+                        <td>34.6</td>
+                        <td>40.7</td>
+                        <td>0.0</td>
+                        <td>68.0</td>
+                        <td>86.0</td>
+                        <td>58.3</td>
+                        <td>62.7</td>
+                        <td>26.4</td>
+                        <td>12.8</td>
+                        <td>85.5</td>
+                        <td>11.8</td>
+                        <td>100.0</td>
+                        <td>0.0</td>
+                        <td>91.8</td>
+                        <td>55.1</td>
+                        <td>5.6</td>
+                        <td>78.1</td>
+                        <td>41.7</td>
+                    </tr>
+                    <tr>
+                        <td>HDense</td>
+                        <td>67.3</td>
+                        <td>71.4</td>
+                        <td>78.6</td>
+                        <td>34.7</td>
+                        <td>74.5</td>
+                        <td>35.9</td>
+                        <td>74.0</td>
+                        <td>81.3</td>
+                        <td>82.7</td>
+                        <td>59.3</td>
+                        <td>64.7</td>
+                        <td>16.0</td>
+                        <td>76.0</td>
+                        <td>72.9</td>
+                        <td>88.2</td>
+                        <td>62.3</td>
+                        <td>16.3</td>
+                        <td>82.3</td>
+                        <td>76.5</td>
+                        <td>63.2</td>
+                        <td>54.0</td>
+                        <td>73.5</td>
+                        <td>59.2</td>
+                        <td>61.1</td>
+                        <td>58.1</td>
+                        <td>63.0</td>
+                    </tr>
+                    <tr>
+                        <td>FuTH-Net</td>
+                        <td>72.7</td>
+                        <td>75.7</td>
+                        <td>87.5</td>
+                        <td>57.1</td>
+                        <td>74.5</td>
+                        <td>34.0</td>
+                        <td>56.0</td>
+                        <td>76.6</td>
+                        <td>71.2</td>
+                        <td>81.4</td>
+                        <td>76.5</td>
+                        <td>36.0</td>
+                        <td>78.0</td>
+                        <td>85.4</td>
+                        <td>80.4</td>
+                        <td>73.6</td>
+                        <td>16.3</td>
+                        <td>64.5</td>
+                        <td>80.4</td>
+                        <td>84.2</td>
+                        <td>56.0</td>
+                        <td>89.8</td>
+                        <td>65.3</td>
+                        <td>63.0</td>
+                        <td>63.9</td>
+                        <td>66.8</td>
+                    </tr>
+                    <tr>
+                        <td>MSTN</td>
+                        <td>61.8</td>
+                        <td>76.1</td>
+                        <td>92.2</td>
+                        <td>60.4</td>
+                        <td>62.8</td>
+                        <td>54.1</td>
+                        <td>69.6</td>
+                        <td>80.0</td>
+                        <td>91.1</td>
+                        <td>73.6</td>
+                        <td>71.7</td>
+                        <td>54.6</td>
+                        <td>86.0</td>
+                        <td>72.4</td>
+                        <td>86.5</td>
+                        <td>66.0</td>
+                        <td>66.9</td>
+                        <td>90.2</td>
+                        <td>74.1</td>
+                        <td>61.9</td>
+                        <td>67.4</td>
+                        <td>56.0</td>
+                        <td>46.6</td>
+                        <td>58.5</td>
+                        <td>51.5</td>
+                        <td>67.4</td>
+                    </tr>
+                    <tr>
+                        <td>TRM</td>
+                        <td>72.7</td>
+                        <td>75.5</td>
+                        <td>87.5</td>
+                        <td>57.1</td>
+                        <td>74.5</td>
+                        <td>34.0</td>
+                        <td>56.0</td>
+                        <td>76.6</td>
+                        <td>71.2</td>
+                        <td>81.4</td>
+                        <td>76.5</td>
+                        <td>36.0</td>
+                        <td>78.0</td>
+                        <td>85.4</td>
+                        <td>80.4</td>
+                        <td>73.6</td>
+                        <td>16.3</td>
+                        <td>64.5</td>
+                        <td>80.4</td>
+                        <td>84.2</td>
+                        <td>56.0</td>
+                        <td>89.8</td>
+                        <td>65.3</td>
+                        <td>63.0</td>
+                        <td>63.9</td>
+                        <td>66.8</td>
+                    </tr>
+                    <tr>
+                        <td>ASAT</td>
+                        <td>62.3</td>
+                        <td>85.7</td>
+                        <td>91.4</td>
+                        <td>56.5</td>
+                        <td>62.7</td>
+                        <td>47.7</td>
+                        <td>66.0</td>
+                        <td>68.8</td>
+                        <td>90.8</td>
+                        <td>75.0</td>
+                        <td>80.5</td>
+                        <td>40.0</td>
+                        <td>84.0</td>
+                        <td>78.9</td>
+                        <td>85.7</td>
+                        <td>64.6</td>
+                        <td>78.8</td>
+                        <td>94.0</td>
+                        <td>61.4</td>
+                        <td>61.9</td>
+                        <td>87.1</td>
+                        <td>56.0</td>
+                        <td>47.9</td>
+                        <td>65.3</td>
+                        <td>55.2</td>
+                        <td>68.1</td>
+                    </tr>
+                    <tr>
+                        <td>UniRS</td>
+                        <td>85.5</td>
+                        <td>89.8</td>
+                        <td>100.0</td>
+                        <td>69.4</td>
+                        <td>78.4</td>
+                        <td>67.9</td>
+                        <td>88.0</td>
+                        <td>95.3</td>
+                        <td>94.2</td>
+                        <td>91.5</td>
+                        <td>88.2</td>
+                        <td>96.0</td>
+                        <td>96.0</td>
+                        <td>100.0</td>
+                        <td>100.0</td>
+                        <td>94.3</td>
+                        <td>73.3</td>
+                        <td>91.9</td>
+                        <td>88.2</td>
+                        <td>89.5</td>
+                        <td>86.0</td>
+                        <td>93.9</td>
+                        <td>83.7</td>
+                        <td>92.6</td>
+                        <td>82.6</td>
+                        <td>87.8</td>
+                    </tr>
+                    <caption>Comparison of video scene classification performance on ERA dataset. Here HDense, FuTH-Net,
+                        MSTN, TRM and ASAT are expert models designed for video classification. VILA-1.5 (3B) is tested
+                        under the zero-shot setting.</caption>
+                </table>
+            </div>
+        </div>
+
+    </section>
+    <!--Results -->
+
+    <!--Conv-->
+
+    <!--Conv -->
+    <style>
+        #BibTeX {
+            margin-bottom: -80px;
+            /* Adjust the negative margin as needed */
+        }
+
+        #Acknowledgement {
+            margin-top: -80px;
+            /* Adjust the negative margin as needed */
+        }
+    </style>
+
+    <section class="section" id="BibTeX">
+        <div class="container is-max-desktop content">
+            <h2 class="title">BibTeX</h2>
+            <pre><code>
+    @misc{li2024unirsunifyingmultitemporalremote,
+      title={UniRS: Unifying Multi-temporal Remote Sensing Tasks through Vision Language Models},
+      author={Yujie Li and Wenjia Xu and Guangzuo Li and Zijian Yu and Zhiwei Wei and Jiuniu Wang and Mugen Peng},
+      year={2024},
+      eprint={2412.20742},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
+      url={https://arxiv.org/abs/2412.20742},
+}
+  </code></pre>
+        </div>
+    </section>
+    <section class="section" id="Acknowledgement">
+        <div class="container is-max-desktop content">
+            <h2 class="title">Acknowledgement</h2>
+            <p>
+                This website is adapted from <a href="https://github.com/nerfies/nerfies.github.io">Nerfies</a>,
+                licensed under
+                a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative
+                    Commons Attribution-ShareAlike 4.0 International License</a>. We are thankful to LLaVA, GeoChat and
+                    VILA for
+                releasing their models and code as open-source contributions.
+            </p>
+        </div>
+    </section>
+
+</body>
+
+</html>
+
+<div style="text-align: center;">
+    <a href="https://sklnst.bupt.edu.cn/en/" target="_blank">
+        <img src="images/SKL_NST.png" width="200" height="200" alt="IVAL Logo">
+    </a>
+    <a href="https://github.com/IntelliSensing" target="_blank">
+        <img src="images/IntelliSense.png" width="190" height="190" alt="Oryx Logo">
+    </a>
+    <a href="https://mbzuai.ac.ae" target="_blank">
+        <img src="images/BUPT_LOGO.png" width="200" height="200" alt="MBZUAI Logo">
+    </a>
+</div>
