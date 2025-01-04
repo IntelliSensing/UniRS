@@ -9,7 +9,7 @@
 
 #### **State Key Laboratory of Networking and Switching Technology, Beijing University of Posts and Telecommunications; Aerospace Information Research Institute, Chinese Academy of Sciences; School of Geographic Sciences, Hunan Normal University; Department of Computer Science, City University of Hong Kong**
 
-[![Website](https://img.shields.io/badge/Project-Website-87CEEB)](https://mbzuai-oryx.github.io/GeoChat)
+[![Website](https://img.shields.io/badge/Project-Website-87CEEB)](https://intellisensing.github.io/UniRS/)
 [![paper](https://img.shields.io/badge/arXiv-Paper-<COLOR>.svg)](https://arxiv.org/abs/2412.20742)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/release/python-3100/)
 
